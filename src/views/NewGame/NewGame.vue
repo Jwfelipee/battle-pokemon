@@ -60,10 +60,9 @@ import { NewGameCode, Pokemon, Player } from "./NewGame";
         pokemon: pokemon.name,
         pokemonId: pokemon.id,
       };
-      console.log(this.selected);
     },
     initGame() {
-      alert("Game iniciado!");
+      this.$router.push("/game");
     },
   },
 })

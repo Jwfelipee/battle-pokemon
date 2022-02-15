@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 import Home from "../views/Home/Home.vue";
 import NewGame from "../views/NewGame/NewGame.vue";
 import Ranking from "../views/Ranking/Ranking.vue";
+import Game from "../views/Game/Game.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -18,6 +19,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/ranking",
     name: "Ranking",
     component: Ranking,
+  },
+  {
+    path: "/game",
+    name: "Game",
+    component: Game,
   },
 ];
 
