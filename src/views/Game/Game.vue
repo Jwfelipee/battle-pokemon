@@ -39,7 +39,9 @@
         <div class="h-3/5 max-h-full w-4/5 flex flex-col justify-center items-center">
           <div class="flex w-full justify-end">
             <div class="max-w-min items-end flex flex-col bg-yellow-100 shadow-xl gap-4 p-3 rounded-xl">
-              {{ player?.pokemon?.name }}
+              <div class="flex gap-2">
+                <span>Pokemon:</span> <b>{{ player?.pokemon?.name }}</b>
+              </div>
               <div class="flex gap-3 items-center">
                 <input
                   type="range"
@@ -85,70 +87,47 @@ import { NewGameCode, ICommand } from "../NewGame/NewGame";
 import { GameCode } from "./Game";
 
 @Options({
-  data() {
+  data(): { player: undefined; adversary: undefined; turn: string; gameCode: GameCode | undefined } {
     return {
       player: undefined,
       adversary: undefined,
       turn: Math.floor(Math.random() * 2) === 0 ? "player" : "adversary",
+      gameCode: undefined,
     };
   },
   async created() {
-    const gameCode = new GameCode(new NewGameCode());
-    this.player = await gameCode.getDatas(this.$route.params);
-    const pokemons = await new NewGameCode().getChampions();
-    const randomIndex = Math.floor(Math.random() * pokemons.length);
-    this.adversary = {
-      name: "Gary",
-      pokemon: pokemons[randomIndex],
-      maxLifePokeomon: pokemons[randomIndex]?.life,
-    };
+    this.gameCode = new GameCode(new NewGameCode(), this.$router);
+    this.player = await this.gameCode.getDatas(this.$route.params);
+    this.adversary = await this.gameCode.createOponentIA();
     if (this.turn === "adversary") {
       this.turnOfAdversary();
     }
   },
   methods: {
     executeCommandPokemon(command: ICommand) {
-      const attackValue = this.randomAttack(command);
-      this.adversary.pokemon.life = this?.adversary?.pokemon?.life - attackValue;
+      this.gameCode.attackAction({
+        attackCommand: command,
+        adversary: this.adversary,
+      });
       this.turn = "adversary";
-      this.whoDefeat();
+      this.gameCode.whoDefeat(this.player, this.adversary, this.turn);
       this.turnOfAdversary();
     },
     turnOfAdversary() {
       setTimeout(() => {
-        const randomIndex = Math.floor(Math.random() * this?.adversary?.pokemon?.commands?.length);
-        const command = this.adversary.pokemon.commands;
-        this.player.pokemon.life = this.player.pokemon.life - this.randomAttack(command[randomIndex]);
-        this.whoDefeat();
+        this.gameCode.attackAction({
+          attackCommand: this.randomCommand(),
+          adversary: this.player,
+        });
+        this.gameCode.whoDefeat(this.player, this.adversary, this.turn);
         this.turn = "player";
       }, 1500);
     },
 
-    whoDefeat() {
-      const whatPlayerLose = this.verefy();
-      if (!whatPlayerLose) return true;
-      setTimeout(() => {
-        this.finallyGame(whatPlayerLose);
-      }, 1000);
-    },
-    verefy() {
-      if (this.player.pokemon.life <= 0) return "player-defeat";
-      else if (this.adversary.pokemon.life <= 0) return "adversary-defeat";
-      return undefined;
-    },
-
-    finallyGame(whatPlayerLose: "player-defeat" | "adversary-defeat" | undefined) {
-      const res = confirm(whatPlayerLose === "player-defeat" ? "Voce perdeu, deseja jogar novamente?" : "Voce Ganhou, deseja jogar novamente?");
-      if (!res) return this.$router.push("/");
-      this.player.pokemon.life = this.player.maxLifePokeomon;
-      this.adversary.pokemon.life = this.adversary.maxLifePokeomon;
-      return (this.turn = Math.floor(Math.random() * 2) === 0 ? "player" : "adversary");
-    },
-
-    randomAttack(command: ICommand) {
-      const max = command?.action[1];
-      const min = command?.action[0];
-      return Math.floor(Math.random() * (max + 1 - min) + min);
+    randomCommand() {
+      const randomIndex = Math.floor(Math.random() * this?.adversary?.pokemon?.commands?.length);
+      const command = this.adversary.pokemon.commands;
+      return command[randomIndex];
     },
   },
 })
