@@ -62,7 +62,7 @@ import { NewGameCode, Pokemon, Player } from "./NewGame";
       };
     },
     initGame() {
-      this.$router.push("/game");
+      this.$router.push(`/game/${this.selected.playerId}/${this.selected.pokemonId}`);
     },
   },
 })

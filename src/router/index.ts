@@ -21,7 +21,7 @@ const routes: Array<RouteRecordRaw> = [
     component: Ranking,
   },
   {
-    path: "/game",
+    path: "/game/:idPlayer/:idPokemon",
     name: "Game",
     component: Game,
   },

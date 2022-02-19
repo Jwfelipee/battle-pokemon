@@ -9,6 +9,13 @@ export type Pokemon = {
   name: string;
   id: number;
   type: string;
+  life: number;
+};
+
+export type ICommand = {
+  type: string;
+  name: string;
+  action: number[];
 };
 
 export class NewGameCode {
@@ -16,6 +23,12 @@ export class NewGameCode {
 
   async get(): Promise<{ players: Player[]; pokemons: Pokemon[]; isFetching: boolean | undefined }> {
     return await this.getDatas();
+  }
+
+  public async getPlayersInMemory() {
+    const players = await this.getPlayers();
+    const pokemons = await this.getChampions();
+    return this.relationPlayerWithPokemons(players, pokemons);
   }
 
   async getDatas(): Promise<{ players: Player[]; pokemons: Pokemon[]; isFetching: boolean | undefined }> {
